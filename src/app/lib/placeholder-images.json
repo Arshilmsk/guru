@@ -1,0 +1,11 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "hero-bg",
+      "description": "Abstract professional background",
+      "imageUrl": "https://picsum.photos/seed/nrega/1920/1080",
+      "imageHint": "professional abstract"
+    }
+  ]
+}

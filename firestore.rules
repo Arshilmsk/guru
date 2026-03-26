@@ -1,0 +1,73 @@
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isSuperAdmin() {
+      return isSignedIn() && getUserRole() == 'SuperAdmin';
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (getUserRole() == 'Admin' || getUserRole() == 'SuperAdmin');
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isSignedIn(); 
+      allow create: if isSignedIn() && request.resource.data.id == userId;
+      allow update: if (isOwner(userId) || isAdmin()) && resource != null;
+      allow delete: if isSuperAdmin() && resource != null;
+
+      // Retained for backward compatibility if needed, but app uses top-level now
+      match /notifications/{notificationId} {
+        allow get, list: if isOwner(userId) || isAdmin();
+        allow create: if isSignedIn();
+        allow update, delete: if isOwner(userId) || isAdmin();
+      }
+    }
+
+    match /job_cards/{jobCardId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn();
+      allow delete: if isAdmin();
+    }
+
+    match /demands/{demandId} {
+      allow get, list: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn();
+      allow delete: if isAdmin();
+    }
+
+    match /notifications/{notificationId} {
+      allow get, list: if isSignedIn() && (resource == null || resource.data.recipientUserId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && (resource.data.recipientUserId == request.auth.uid || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    match /messages/{messageId} {
+      allow create: if true;
+      allow get, list, update, delete: if isAdmin();
+    }
+
+    match /activity_logs/{logId} {
+      allow get, list: if isSuperAdmin();
+      allow create, update, delete: if isSuperAdmin();
+    }
+  }
+}

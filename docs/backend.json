@@ -1,0 +1,247 @@
+
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user in the NREGA GURU application, including their role, contact information, and token balance.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the User entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The full name of the user."
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the user, used for login and communication.",
+          "format": "email"
+        },
+        "mobileNumber": {
+          "type": "string",
+          "description": "The mobile contact number of the user."
+        },
+        "gramPanchayat": {
+          "type": "string",
+          "description": "The Gram Panchayat associated with the user."
+        },
+        "block": {
+          "type": "string",
+          "description": "The administrative block associated with the user."
+        },
+        "role": {
+          "type": "string",
+          "description": "The assigned role (SuperAdmin, Admin, User)."
+        },
+        "tokensAvailable": {
+          "type": "number",
+          "description": "Tokens available for adding job cards."
+        },
+        "photoURL": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the user's profile picture."
+        },
+        "createdByUserId": {
+          "type": "string",
+          "description": "Reference to the User ID who created this user."
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "Account status."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "email",
+        "gramPanchayat",
+        "block",
+        "role",
+        "tokensAvailable",
+        "isActive",
+        "createdAt"
+      ]
+    },
+    "JobCard": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "JobCard",
+      "type": "object",
+      "description": "Stores detailed information about NREGA job cards.",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "jobCardNumber": {
+          "type": "string"
+        },
+        "workerName": {
+          "type": "string"
+        },
+        "fatherName": {
+          "type": "string"
+        },
+        "gender": {
+          "type": "string",
+          "enum": ["Male", "Female", "Other"]
+        },
+        "gramPanchayat": {
+          "type": "string"
+        },
+        "block": {
+          "type": "string"
+        },
+        "mandays": {
+          "type": "number"
+        },
+        "workerVideoUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "videoVerificationStatus": {
+          "type": "string"
+        },
+        "addedByUserId": {
+          "type": "string"
+        },
+        "assignedToUserId": {
+          "type": "string"
+        },
+        "acceptedByUserId": {
+          "type": "string"
+        },
+        "dateAdded": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "lastUpdated": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jobCardNumber",
+        "workerName",
+        "fatherName",
+        "gramPanchayat",
+        "block",
+        "mandays",
+        "videoVerificationStatus",
+        "addedByUserId",
+        "dateAdded",
+        "status"
+      ]
+    },
+    "DemandRequest": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "DemandRequest",
+      "type": "object",
+      "description": "Represents a demand for workers submitted by a user.",
+      "properties": {
+        "id": { "type": "string" },
+        "requesterId": { "type": "string" },
+        "requesterName": { "type": "string" },
+        "recipientId": { "type": "string" },
+        "demandDays": { "type": "number" },
+        "status": { "type": "string", "enum": ["Pending", "Accepted", "Rejected"] },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "jobCardId": { "type": "string" },
+              "workerName": { "type": "string" },
+              "jobCardNumber": { "type": "string" },
+              "deductedDays": { "type": "number" }
+            }
+          }
+        },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "requesterId", "requesterName", "recipientId", "demandDays", "status", "items", "createdAt"]
+    },
+    "SystemMessage": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "SystemMessage",
+      "type": "object",
+      "description": "Messages sent by users to support.",
+      "properties": {
+        "id": { "type": "string" },
+        "senderName": { "type": "string" },
+        "senderEmail": { "type": "string" },
+        "senderUserId": { "type": "string" },
+        "content": { "type": "string" },
+        "priority": { "type": "string", "enum": ["Low", "Medium", "High", "Urgent"] },
+        "isRead": { "type": "boolean" },
+        "replyContent": { "type": "string" },
+        "repliedAt": { "type": "string", "format": "date-time" },
+        "repliedBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": { "$ref": "#/backend/entities/User" },
+          "description": "User profiles."
+        }
+      },
+      {
+        "path": "/job_cards/{jobCardId}",
+        "definition": {
+          "entityName": "JobCard",
+          "schema": { "$ref": "#/backend/entities/JobCard" },
+          "description": "NREGA job cards."
+        }
+      },
+      {
+        "path": "/demands/{demandId}",
+        "definition": {
+          "entityName": "DemandRequest",
+          "schema": { "$ref": "#/backend/entities/DemandRequest" },
+          "description": "Worker demand requests."
+        }
+      },
+      {
+        "path": "/notifications/{notificationId}",
+        "definition": {
+          "entityName": "Notification",
+          "description": "System and user notifications."
+        }
+      },
+      {
+        "path": "/messages/{messageId}",
+        "definition": {
+          "entityName": "SystemMessage",
+          "description": "User support messages."
+        }
+      }
+    ]
+  }
+}
